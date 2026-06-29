@@ -167,6 +167,55 @@
     }
     .info-box strong { color: var(--ink); }
 
+    /* ===== LIGHTBOX ===== */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 1000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 16px;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox-bar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+    #lightbox-back {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: .05em;
+    }
+    #lightbox-back:hover { background: var(--red-lt); }
+    #lightbox-title {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: .85;
+    }
+    #lightbox img {
+      max-width: 100%;
+      max-height: calc(100vh - 80px);
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.6);
+    }
+
     /* ===== FOOTER ===== */
     footer {
       text-align: center;
@@ -211,25 +260,25 @@
 
     <!-- ↓ Claude Code が flyers/ をスキャンしてここを自動生成 -->
     <!-- GENERATED_FLYERS_START -->
-    <a class="card" href="flyers/v1-1.jpg" target="_blank">
+    <a class="card" href="#" onclick="openLightbox('flyers/v1-1.jpg','v1-1 アメリカンダイナー');return false;">
       <div class="card-icon">🎨</div>
       <div class="card-name">v1-1 アメリカンダイナー</div>
       <div class="card-desc">ターコイズ強化 / クラシックUS風</div>
       <span class="card-tag tag-done">確定</span>
     </a>
-    <a class="card" href="flyers/v1-3.jpg" target="_blank">
+    <a class="card" href="#" onclick="openLightbox('flyers/v1-3.jpg','v1-3 ネオンサイバー');return false;">
       <div class="card-icon">🌟</div>
       <div class="card-name">v1-3 ネオンサイバー</div>
       <div class="card-desc">オノマトペ大幅強化 / 光るネオン調</div>
       <span class="card-tag tag-done">確定</span>
     </a>
-    <a class="card" href="flyers/v2-1.jpg" target="_blank">
+    <a class="card" href="#" onclick="openLightbox('flyers/v2-1.jpg','v2-1 本気系');return false;">
       <div class="card-icon">⚡</div>
       <div class="card-name">v2-1 本気系</div>
       <div class="card-desc">漆黒×蛍光黄 / 人物全面リムライト</div>
       <span class="card-tag tag-done">確定</span>
     </a>
-    <a class="card" href="flyers/v2-2.jpg" target="_blank">
+    <a class="card" href="#" onclick="openLightbox('flyers/v2-2.jpg','v2-2 ドドン深紅');return false;">
       <div class="card-icon">🔴</div>
       <div class="card-name">v2-2 ドドン深紅</div>
       <div class="card-desc">¥200演出・傾き・縁取り強調</div>
@@ -276,6 +325,36 @@
 <footer>
   このページは Claude Code で自動生成 · 新規ファイル追加時は session-start プロンプトで再生成
 </footer>
+
+<!-- ===== LIGHTBOX ===== -->
+<div id="lightbox" role="dialog" aria-modal="true">
+  <div id="lightbox-bar">
+    <button id="lightbox-back" onclick="closeLightbox()">← 戻る</button>
+    <span id="lightbox-title"></span>
+  </div>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+  function openLightbox(src, title) {
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-title').textContent = title;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-img').src = '';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
 
 </body>
 </html>
