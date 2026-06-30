@@ -45,9 +45,12 @@ const peopleImgs = scanImages('images/people');
 
 | 案 | ホットドッグの役割 | 禁止 |
 |---|---|---|
-| ①ダイナー | 画面の1/3以上を占める断ち落とし or 浮遊感のある特大配置 | 吹き出しの中に小さく収める |
-| ②黒板 | チョーク枠でクローズアップ。パンの断面・ソーセージの質感が見えるサイズ | 人物より小さい |
-| ③サイバー | 回転＋はみ出し。色面の境界を食い破るように配置 | 情報カードの横に添える程度 |
+| v1 ダイナー | 画面の1/3以上を占める断ち落とし or 浮遊感のある特大配置 | 吹き出しの中に小さく収める |
+| v2 サイバー | 回転＋はみ出し。色面の境界を食い破るように配置 | 情報カードの横に添える程度 |
+| v3〜v4 | 人物の前景・手の高さに配置。人物の視線誘導先 | 情報帯の脇に添える程度 |
+| v5 コミック | 2種を横並び同サイズで画面中央に配置。吹き出しで囲む | 片方だけ使う |
+
+**すべての案で `plainHotdog`（オリジナル）と `cheeseHotdog`（チーズ）を同じサイズでペア配置すること。**
 
 ホットドッグ画像がない場合のみ 🌭 絵文字（200pt）で代替。省略は絶対にしない。
 
@@ -83,20 +86,25 @@ pptx.layout = 'A4';
 | `shadow` 等オブジェクトは毎回 `{}` で新規生成 | 共有参照バグ防止 |
 | 断ち落としは座標負値 or W/H 超でよい | スライド外へのはみ出し意図的に使う |
 | 地色が明るい面に白文字禁止 / 暗い面に黒文字禁止 | コントラスト確保 |
+| **ホットドッグ・チーズホットドッグは全案で必ず両方使用** | 片方のみ省略禁止。`plainHotdog` + `cheeseHotdog` を必ずペアで配置 |
+| **2種は同じサイズ（同一 w/h）で配置する** | 大小差をつけない。メイン/サブの違いは位置・グロー色で表現 |
+| **人物をメインとする** | 人物が最大の視覚的主役。ホットドッグは人物に次ぐ存在感 |
 
 ---
 
-## STEP 2 ── 3案の実装
+## STEP 2 ── 各案の実装
 
-> **3案は「別の感情体験」であること**
+> **各案は「別の感情体験」であること**
 >
-> 案①：「背景そのものが叫んでいる」——情報はその中に浮かぶ
-> 案②：「手で書かれた・貼られた」——物質感・温度感がある
-> 案③：「タイポと色面のエネルギーが衝突している」——静止画なのに動いて見える
+> v1：「背景そのものが叫んでいる」——情報はその中に浮かぶ
+> v2：「タイポと色面のエネルギーが衝突している」——静止画なのに動いて見える
+> v3：人物が舞台、コピーが主役——漆黒×蛍光で最大コントラスト
+> v4：数字が主役ビジュアル——人物は重厚な舞台背景
+> v5：アメコミ原色×爆発バブル——一瞬で視線を爆発させる
 
 ---
 
-### ── 案① アメリカンダイナー ──
+### ── v1 アメリカンダイナー ──
 
 **スタイル：1950〜60年代レトロダイナー。チェッカーフロア柄、太ゴシック、赤×白×黒×ターコイズ。**
 
@@ -195,7 +203,7 @@ slide1.addShape(pptx.ShapeType.roundRect, {
   rectRadius: 0.15
 });
 slide1.addText(
-  'ホットドッグ ¥200　現金のみ\nトッピング全部無料！\nケチャップ・マスタード・マヨネーズ\n各「普通」「多め」が選べます\n\n10月16日（土）\n4年S科教室',
+  'ホットドッグ ¥200\nチーズホットドッグ ¥300\n現金のみ\nトッピング全部無料！\nケチャップ・マスタード・マヨネーズ\n各「普通」「多め」が選べます\n\n10月16日（土）\n4年S科教室',
   {
     x: 0.4, y: 7.35, w: 7.5, h: 3.9,
     fontSize: 30, color: '1A1A1A', valign: 'top', align: 'left',
@@ -206,151 +214,7 @@ slide1.addText(
 
 ---
 
-### ── 案② 黒板チョーク ──
-
-**スタイル：カフェメニューボード調。暗緑の黒板地に白・パステルの手書き文字。円形フレーム・リボン多用。**
-
-**カラーパレット**
-
-| 役割 | HEX | 説明 |
-|---|---|---|
-| 黒板 | `1E3A1E` | 黒板グリーン（別案：`2C6B6A`） |
-| チョーク白 | `FAF5E4` | クリーム白（メイン文字。参考：`F0F0F0`） |
-| 黄緑 | `8DB36A` | デコアクセント（参考：`A5D6A7`） |
-| 淡黄 | `FFF9C4` | 補色 |
-| サーモン | `FF8A80` | ポイントアクセント |
-
-**フォント**：Yomogi（全文字・手書き感）/ 別案：Chalkboard / Chalkduster  
-**サイズ比**：見出し30pt：本文14pt（2:1）  
-**テキスト効果**：
-- チョーク粉感 → `shadow: { type:'outer', color:'FFFFFF', blur:3, offset:0, angle:0 }`
-- 文字の透過5〜15%で粉っぽさを演出
-- 枠に `shadow: { type:'inner', color:'FFFFFF', blur:3, offset:0 }` で内側光彩
-
-**大仕掛け：ホットドッグをチョーク枠で"黒板に描いた料理図"として中央主役に**
-
-```
-[黒板グリーン 全面]
-  ├─ ホットドッグPNG：中央大判 w=6.5 h=4.8 contain（二重矩形枠）
-  ├─ 「¥200」：Yomogi 88pt FAF5E4 ホットドッグ上にかぶせ transparency:15
-  ├─ 「ほかほか」34pt FFF9C4 独立浮遊ビジュアル（rotate:5°）
-  ├─ 人物PNG（あれば）：右端円形抜き（小〜中サイズ）
-  ├─ 「本日のメニュー」：左端縦書き（vert:eaVert）
-  ├─ 「10.16」80pt 背景デザイン要素
-  └─ トッピング・日付・場所 30pt+（下部）
-```
-
-```js
-const slide2 = pptx.addSlide();
-
-// 黒板全面
-slide2.addShape(pptx.ShapeType.rect, {
-  x: 0, y: 0, w: 8.27, h: 11.69,
-  fill: { color: '1E3A1E' }, line: { type: 'none' }
-});
-
-// ホットドッグ：中央大判
-if (hotdogImgs[0]) {
-  slide2.addImage({
-    path: hotdogImgs[0],
-    x: 0.9, y: 2.2, w: 6.5, h: 4.8,
-    sizing: { type: 'contain', w: 6.5, h: 4.8 }
-  });
-}
-
-// チョーク風二重矩形枠
-slide2.addShape(pptx.ShapeType.roundRect, {
-  x: 0.75, y: 2.05, w: 6.77, h: 5.1,
-  fill: { type: 'none' }, line: { color: 'FAF5E4', width: 3 },
-  rectRadius: 0.08,
-  shadow: { type: 'inner', color: 'FFFFFF', blur: 3, offset: 0, angle: 0 }
-});
-slide2.addShape(pptx.ShapeType.roundRect, {
-  x: 0.62, y: 1.92, w: 7.03, h: 5.36,
-  fill: { type: 'none' }, line: { color: 'FAF5E4', width: 1.2, transparency: 30 },
-  rectRadius: 0.1
-});
-
-// ¥200 特大（ホットドッグの上にかぶせ）
-slide2.addText('¥200', {
-  x: 0.9, y: 2.4, w: 3.5, h: 1.8,
-  fontSize: 88, bold: true, color: 'FAF5E4', fontFace: 'Yomogi',
-  transparency: 15,
-  shadow: { type: 'outer', color: 'FFFFFF', blur: 3, offset: 0, angle: 0 }
-});
-
-// 「ほかほか」単体しずる（独立浮遊ビジュアル要素）
-slide2.addText('ほかほか', {
-  x: 5.2, y: 1.2, w: 3.0, h: 0.85,
-  fontSize: 34, bold: true, color: 'FFF9C4', fontFace: 'Yomogi',
-  rotate: 5,
-  shadow: { type: 'outer', color: 'FFFFFF', blur: 4, offset: 0, angle: 0 }
-});
-
-// 枠外の手書きデコ
-slide2.addText('← コレ！ ★', {
-  x: 0.1, y: 4.5, w: 1.8, h: 0.6,
-  fontSize: 16, color: '8DB36A', fontFace: 'Yomogi', rotate: -12
-});
-slide2.addText('↑ うまい！', {
-  x: 3.5, y: 7.25, w: 2.5, h: 0.6,
-  fontSize: 14, color: 'FAF5E4', fontFace: 'Yomogi',
-  shadow: { type: 'outer', color: 'FFFFFF', blur: 2, offset: 0, angle: 0 }
-});
-
-// 人物（あれば）：右端 円形抜き（contain不可→cover+rounding）
-if (peopleImgs[0]) {
-  slide2.addImage({
-    path: peopleImgs[0],
-    x: 5.8, y: 0.4, w: 2.2, h: 2.2,
-    sizing: { type: 'cover', w: 2.2, h: 2.2 },
-    rounding: true
-  });
-  slide2.addShape(pptx.ShapeType.ellipse, {
-    x: 5.72, y: 0.32, w: 2.36, h: 2.36,
-    fill: { type: 'none' }, line: { color: 'FAF5E4', width: 2.5 }
-  });
-}
-
-// 縦書き「本日のメニュー」
-slide2.addText('本日のメニュー', {
-  x: 0.05, y: 1.2, w: 0.65, h: 5.5,
-  fontSize: 13, color: 'FAF5E4', fontFace: 'Yomogi',
-  vert: 'eaVert', valign: 'top'
-});
-
-// しずる文（独立行）
-slide2.addText('もちふわパンに粗びきウィンナが暴れる。', {
-  x: 0.8, y: 0.3, w: 5.0, h: 1.0,
-  fontSize: 22, color: 'FAF5E4', fontFace: 'Yomogi', italic: true,
-  shadow: { type: 'outer', color: 'FFFFFF', blur: 2, offset: 0, angle: 0 }
-});
-
-// 「10.16」大きなデザイン要素
-slide2.addText('10.16', {
-  x: 0.5, y: 7.6, w: 4.0, h: 1.4,
-  fontSize: 80, bold: true, color: 'FAF5E4', fontFace: 'Yomogi',
-  transparency: 12
-});
-
-// トッピング・詳細情報（30pt+）
-slide2.addText('ケチャップ　マスタード　マヨネーズ', {
-  x: 0.7, y: 9.1, w: 6.9, h: 0.7,
-  fontSize: 26, color: 'FAF5E4', fontFace: 'Yomogi', align: 'center'
-});
-slide2.addText('3種すべて 無料！', {
-  x: 0.7, y: 9.85, w: 6.9, h: 0.65,
-  fontSize: 28, bold: true, color: '8DB36A', fontFace: 'Yomogi', align: 'center'
-});
-slide2.addText('10月16日（土）　4年S科教室　現金のみ', {
-  x: 0.7, y: 10.6, w: 6.9, h: 0.75,
-  fontSize: 22, color: 'FAF5E4', fontFace: 'Yomogi', align: 'center'
-});
-```
-
----
-
-### ── 案③ ネオンサイバー ──
+### ── v2 ネオンサイバー ──
 
 **スタイル：80〜90年代SF映画・Synthwave・Cyberpunk。濃紫黒背景にネオン発光テキスト、スキャンライン、パースのかかったグリッドフロア。**
 
@@ -545,14 +409,13 @@ slide3.addText('現金のみ', {
 
 ---
 
-## [v2] ディープリサーチ反映 ── 刷新3案
+## [v3/v4] ディープリサーチ反映 ── 刷新案
 
-> ディープリサーチ（2026-06-29）の知見を基に v2 の設計方針を定義。
-> `generate-flyer-02.js` 生成時はここを参照する。
+> ディープリサーチ（2026-06-29）の知見を基に設計。
 
 ---
 
-### ── v2-案① 本気系（黒×蛍光イエロー×人物全面）──
+### ── v3 本気系（黒×蛍光イエロー×人物全面）──
 
 **参考構図：スティーブ・マックイーン風 / コンサート告知ポスター**
 - 人物をフレームいっぱいに配置し、黒背景でコントラスト最大化
@@ -590,7 +453,7 @@ slide3.addText('現金のみ', {
 
 ---
 
-### ── v2-案② ドドン深紅（¥200を人物の手で"持つ"演出）──
+### ── v4 ドドン深紅（¥200を人物の手で"持つ"演出）──
 
 **参考：大型セール広告 / スポーツイベント告知**
 - 数字（¥200）が主役ビジュアル。人物は舞台背景
@@ -629,37 +492,155 @@ slide3.addText('現金のみ', {
 
 ---
 
-### ── v2-案③ 映画ポスターネタ（シリアス×アクション風パロディ）──
+### ── v5 アメリカンコミック風 ──
 
-**ジャンル：シリアス・アクション風が最もギャップが大きく笑いを誘う**
-理由：重厚な色使い・フォントで「本物感」を出してから「高専屋台」が来る破壊力が最大。
-ホラー風は意外性があるがニッチ。ラブコメ風は可愛いがインパクト弱め。
+> ディープリサーチ（2026-06-30）をもとに策定。
 
-**本物映画ポスターの構成要素（再現して「二度見ネタ」を作る）**
+**スタイル：原色の爆発配色・ベンデイ点（網点）・吹き出しバブル・擬音語。視線を一瞬で爆発させる。**
 
-| 要素 | 映画本物 | このポスターでの置き換え |
+**カラーパレット**
+
+| 役割 | HEX | 説明 |
 |---|---|---|
-| 配給・製作クレジット（最上部） | 制作会社名 | 旭川高専 システム制御情報工学科 4年 制作 |
-| 冠詞 | 「劇場版」「完全版」 | 「劇場版」（左上小さく） |
-| あおり文 | 「○○が今、○○する」 | 「この200円が、伝説となる。」 |
-| メインタイトル | 映画名 Impact 大 | 「おいしいホットドック屋さん」 |
-| サブタイトル | 〜篇 | 「〜 ¥200の衝撃、学祭に降り立つ 〜」 |
-| キャスト・監督クレジット（下部） | 俳優名／監督名 | 「出演：旭川高専4年生全員　特別出演：ホットドッグ」 |
-| 公開日 | 「○月○日（曜）全国ロードショー」 | 「2026年10月16日（土） 絶賛公開中」 |
-| 上映場所 | 劇場名 | 「4年S科教室（全館解放）」 |
-| 鑑賞料 | 「一般¥1,900」 | 「鑑賞料：¥200（税込・現金のみ）」 |
+| 背景 | `FF0000` | 原色赤・爆発感 |
+| 主役文字・ドット | `FFFF00` | 蛍光イエロー（CMYKくすみ注意）|
+| 輪郭・網点 | `000000` | スミベタ |
+| 補色アクセント | `0000FF` | ブルー（影・サブ） |
+| 白 | `FFFFFF` | 逆文字・余白 |
 
-**おすすめギャグコピー案（poster-prompt.md STEP 3 [D]も参照）**
-- あおり文: 「この200円が、伝説となる。」「高専生が本気で焼く、青春の一皿。」
-- キャスト: 「出演：旭川高専4年生全員 / 特別出演：ホットドッグ（本人役）」
-- 「※本作は実話に基づいています」
+**フォント**：Impact（英字・数字・擬音）/ 日本語ゴシック太字（和文コピー）  
+**サイズ比**：擬音160pt：タイトル60pt：本文20pt（8:3:1）  
+**テキスト効果**：
+- 文字アウトライン: `shadow: { type:'outer', color:'000000', blur:0, offset:4, angle:45 }` で太い黒縁模擬
+- グロー: blur 14〜24、同色shadow（蛍光感）
+- 擬音語は rotate:10〜20° で躍動感
 
-**配色**
+**大仕掛け：赤地ベンデイ点＋爆発バブル＋人物全面＋ホットドッグ2種横並び**
+
 ```
-黒（0A0A0A）× 白（FFFFFF）× 深紅（CC0000）
-タイトル: 白 Impact + CC0000 glow
-あおり文: 白 italic
-クレジット行: グレー（AAAAAA）小さく横並び
+[FF0000 全面背景]
+[FFFF00 小円ドット（ベンデイ点）: 0.36in間隔 千鳥配置 全面]
+
+上部：
+  ├─ 爆発バブル楕円: 「POW!」「BAM!」大文字60pt 黒縁
+  └─ 吹き出し「うまい！！」40pt 日本語
+
+中部：
+  ├─ 人物PNG: 全面 contain（メイン・最前景）白リムライト
+  ├─ オリジナルホットドッグ: 左下 w=3.5 h=3.5 contain（黒縁shadow）
+  └─ チーズホットドッグ: 右下 w=3.5 h=3.5 contain（黒縁shadow）
+
+価格爆発バブル：
+  ├─ 星形楕円（FFFF00）: 「¥200」「¥300チーズ」各バブルに
+  └─ 黒縁取り太め（shadow blur:0 offset:5）
+
+下部情報帯（黒ベタ帯）：
+  ├─ 「10月16日（土）　4年S科教室」白文字 Impact 36pt
+  ├─ トッピング3種 白 22pt
+  └─ 「TOPPING ALL FREE!!」FFFF00 Impact 32pt
+```
+
+**構図ポイント（リサーチ知見）**
+- 文字は価格も含め**極太・黒縁必須**（背景と同化防止。縁取りサイズ: 文字サイズの2〜5%）
+- 擬音語は斜め 10〜15° で躍動感。独立した大きなビジュアル要素として扱う（小さく添えるな）
+- 顔や手の重要な表情に文字をかぶせない。配置は胴体周辺・足元・画面端
+- 人物背後を暗転グラデで浮き立たせ、前景テキストの可読性を確保
+
+**ベンデイ点実装コード例**
+
+```js
+const slide = pptx.addSlide();
+
+// 赤全面背景
+slide.addShape(pptx.ShapeType.rect, {
+  x: 0, y: 0, w: W, h: H,
+  fill: { color: 'FF0000' }, line: { type: 'none' }
+});
+
+// ベンデイ点（黄色小円・千鳥配置）
+const DOT_R = 0.16;
+for (let row = 0; row < 33; row++) {
+  for (let col = 0; col < 24; col++) {
+    const x = col * 0.36 + (row % 2 === 0 ? 0 : 0.18);
+    const y = row * 0.36;
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x, y, w: DOT_R * 2, h: DOT_R * 2,
+      fill: { color: 'FFFF00' }, line: { type: 'none' }
+    });
+  }
+}
+
+// 爆発バブル（楕円重ね + テキスト）
+slide.addShape(pptx.ShapeType.ellipse, {
+  x: 0.2, y: 0.3, w: 4.2, h: 1.8,
+  fill: { color: 'FFFF00' }, line: { color: '000000', width: 5 }
+});
+slide.addText('POW!', {
+  x: 0.2, y: 0.3, w: 4.2, h: 1.8,
+  fontSize: 72, bold: true, fontFace: 'Impact', color: '000000',
+  align: 'center', valign: 'middle'
+});
+
+// 人物：全面メイン
+if (peopleImgs[0]) {
+  addContain(slide, peopleImgs[0], 0, 0, W, H, {
+    vAlign: 'top',
+    shadow: { type: 'outer', color: 'FFFFFF', blur: 20, offset: 0, angle: 0 }
+  });
+}
+
+// ホットドッグ2種・同サイズ横並び（下部）
+const HD_W = 3.5, HD_H = 3.5;
+if (plainHotdog) {
+  addContain(slide, plainHotdog, 0.1, 7.0, HD_W, HD_H, {
+    shadow: { type: 'outer', color: '000000', blur: 0, offset: 6, angle: 45 }
+  });
+}
+if (cheeseHotdog) {
+  addContain(slide, cheeseHotdog, 4.5, 7.0, HD_W, HD_H, {
+    shadow: { type: 'outer', color: '000000', blur: 0, offset: 6, angle: 45 }
+  });
+}
+
+// ¥200 吹き出し（星型代替：楕円）
+slide.addShape(pptx.ShapeType.ellipse, {
+  x: 0.0, y: 6.0, w: 3.0, h: 1.5,
+  fill: { color: 'FFFF00' }, line: { color: '000000', width: 5 }
+});
+slide.addText('¥200', {
+  x: 0.0, y: 6.0, w: 3.0, h: 1.5,
+  fontSize: 54, bold: true, fontFace: 'Impact', color: '000000',
+  align: 'center', valign: 'middle'
+});
+
+// チーズ ¥300 吹き出し
+slide.addShape(pptx.ShapeType.ellipse, {
+  x: 5.0, y: 6.0, w: 3.2, h: 1.5,
+  fill: { color: 'FFFFFF' }, line: { color: '000000', width: 5 }
+});
+slide.addText('チーズ¥300', {
+  x: 5.0, y: 6.0, w: 3.2, h: 1.5,
+  fontSize: 40, bold: true, fontFace: 'Impact', color: '000000',
+  align: 'center', valign: 'middle'
+});
+
+// 下部黒帯
+slide.addShape(pptx.ShapeType.rect, {
+  x: 0, y: H - 2.4, w: W, h: 2.4,
+  fill: { color: '000000' }, line: { type: 'none' }
+});
+slide.addText('10月16日（土）　4年S科教室', {
+  x: 0.15, y: H - 2.3, w: 8.0, h: 0.8,
+  fontSize: 36, bold: true, color: 'FFFFFF', fontFace: 'Impact'
+});
+slide.addText('TOPPING ALL FREE!!', {
+  x: 0.15, y: H - 1.45, w: 8.0, h: 0.65,
+  fontSize: 32, bold: true, color: 'FFFF00', fontFace: 'Impact'
+});
+slide.addText('ケチャップ　マスタード　マヨネーズ　現金のみ', {
+  x: 0.15, y: H - 0.75, w: 8.0, h: 0.6,
+  fontSize: 22, bold: true, color: 'FFFFFF', fontFace: 'Impact'
+});
 ```
 
 ---
@@ -700,9 +681,29 @@ slide3.addText('現金のみ', {
 
 | 案 | 優先しずる |
 |---|---|
-| ①ダイナー | 「外はぱりっ、中はジューシー。」＋「噛んだら終わり、もう一本食べたくなる。」 |
-| ②黒板 | 「もちふわパンに粗びきウィンナが暴れる。」＋「ほかほか」単体を空間に浮かせる |
-| ③サイバー | 「じゅわっ」「ぱりっ」「ジューシー」単体を40〜60ptで空間配置 ＋「かじった瞬間、じゅわっとあふれる。」 |
+| v1 ダイナー | 「外はぱりっ、中はジューシー。」＋「噛んだら終わり、もう一本食べたくなる。」 |
+| v2 サイバー | 「じゅわっ」「ぱりっ」「ジューシー」単体を40〜60ptで空間配置 ＋「かじった瞬間、じゅわっとあふれる。」 |
+| v3 本気系 | 「外はぱりっ、中はジューシー。」（蛍光黄・太字） |
+| v4 深紅 | 「かじった瞬間、じゅわっとあふれる。」 |
+| v5 コミック | 「うまい！！」「JUICY!!」「CRISPY!!」擬音バブルとして大きく配置 |
+
+---
+
+## ⚠️ 既存PPTX編集前の必須チェック
+
+**PPTXに関わる作業を始める前に必ずエージェントを立ち上げて既存スライドを分析すること。**
+
+```
+Agent({
+  prompt: "flyers/ 以下のPPTXのテキスト内容をzipとして展開して抽出し、
+           generate スクリプトとの差分・ユーザーが加えた編集・各スライドの
+           良さや意図を整理してレポートせよ"
+})
+```
+
+- 分析結果をもとに方針を決めてからコードに触る
+- generate スクリプト全実行はPowerPoint手動編集を消す → 禁止（明示的「全部作り直し」指示がない限り）
+- 単スライド更新が必要なら単体スクリプトを新規作成してPowerPointで差し替えてもらう
 
 ---
 
@@ -722,20 +723,23 @@ pptx.writeFile({ fileName: 'flyers/hotdog-flyer-3plans.pptx' });
 ## STEP 5 ── QAチェックリスト（生成後に自己確認）
 
 ```
-□ ホットドッグ画像が全3案に必ず使われているか（省略 = やり直し）
+□ オリジナルホットドッグ・チーズホットドッグ 両方が全案に使われているか（片方省略 = やり直し）
+□ 2種のホットドッグは同じサイズ（同一 w/h）で配置されているか
+□ 人物が最大の視覚的主役になっているか
 □ ¥200 が全案でヒーロー扱いされているか（小さく添えるだけ = NG）
+□ チーズホットドッグ ¥300 が全案に記載されているか
 □ トッピング3種が全案に記載されているか（グラム表記は禁止）
 □ 「10月16日（土）」と「4年S科教室」が全案にあるか
 □ しずるオノマトペ or しずる文が各案で独立した大きなテキスト要素として使われているか
 □ 人物写真に sizing:'contain' を使っているか（cover で引き伸ばし = やり直し）
 □ ホットドッグ画像の縦横比が崩れていないか（sizing必須）
 □ 日付・場所・トッピングが30pt以上の独立テキストになっているか（10〜14ptの情報ブロック = NG）
-□ 3案の構図が互いに完全に別物か（色違いは NG）
+□ v1〜v5の構図が互いに完全に別物か（色違いは NG）
 □ 地色×文字色のコントラストが確保されているか
 □ 各案の「大胆な仕掛け」が機能しているか
 □ hex に # が混入していないか
 □ shadow 等オブジェクトを共有参照していないか
-□ 3案どれも「上に写真／中にキャッチ／下に情報」になっていないか
+□ どの案も「上に写真／中にキャッチ／下に情報」になっていないか
 ```
 
 ---
