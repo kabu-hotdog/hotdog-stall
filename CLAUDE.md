@@ -12,13 +12,15 @@
 
 | やりたいこと | 読むファイル |
 |---|---|
+| **作業の進め方・品質基準（全作業共通の行動規範）** | `.claude/skills/context-framework.md` |
 | 屋台の基本情報・メニュー・設備 | `.claude/skills/stall-info.md` |
 | ポスター・フライヤーを作る | `.claude/skills/poster/poster-prompt.md` |
-| デザインスタイル参考（GPTリサーチ済） | `.claude/skills/poster/01_american-diner.md` `.claude/skills/poster/02_chalkboard-chalk-art.md` `.claude/skills/poster/03_neon-cyber.md` |
-| 新規セッション開始・index更新 | `.claude/skills/session-start.md` |
+| **制作ノウハウ（実制作で得た知見・技術Tips・QAチェックリスト）** | `.claude/skills/poster/poster-knowhow.md` |
 
 ## 出力の基本ルール
 
-- 生成した .pptx は `flyers/` に保存、`index.html` のカードも更新する
+- 生成した .pptx は `flyers/` に保存する
+- `index.html` のカード追加・JPG変換は、ユーザーが完成版を明示的に承認したときだけ行う（承認前に書き換えない）
 - 日本語メイン、高専生らしくポップに
 - 画像素材：`images/hotdog/`（ホットドッグ）、`images/people/`（人物）に追加する
+- **pptxを再生成する前に、必ず手動編集されていないか確認する。PowerPointが開いていて再生成できない時は、理由を決めつけて無断でプロセスを閉じるな。必ずユーザーに聞く。** 過去にこれを怠ってユーザーの手動編集を握りつぶした事故がある（詳細は`.claude/skills/poster/poster-knowhow.md` §7）。例外なし。
