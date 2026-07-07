@@ -3,6 +3,7 @@
 const PptxGenJS = require('pptxgenjs');
 const fs = require('fs');
 const path = require('path');
+const { safeWriteFile } = require('./pptx-safe-write');
 
 function getPngSize(filePath) {
   try {
@@ -216,6 +217,6 @@ const W = 8.27, H = 11.69;
   });
 }
 
-pptx.writeFile({ fileName: 'flyers/v1-2-new.pptx' })
+safeWriteFile(pptx, 'flyers/v1-2-new.pptx')
   .then(() => console.log('✅ flyers/v1-2-new.pptx を生成しました'))
   .catch(err => { console.error('❌ エラー:', err); process.exit(1); });
