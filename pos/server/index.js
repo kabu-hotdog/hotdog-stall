@@ -56,33 +56,25 @@ function buildServer({ dataFile = DEFAULT_DATA_FILE, now = () => new Date() } = 
     });
   }
 
+  function handleCartMutation(socket, event, fn) {
+    socket.on(event, (payload) => {
+      try {
+        fn(payload || {});
+        broadcastState();
+      } catch (err) {
+        console.error(`${event} failed:`, err.message);
+      }
+    });
+  }
+
   io.on('connection', (socket) => {
     socket.emit('state', currentState());
 
-    socket.on('cart:addItem', ({ product, toppings }) => {
-      store.addItem(product, toppings);
-      broadcastState();
-    });
-
-    socket.on('cart:removeItem', ({ index }) => {
-      store.removeItem(index);
-      broadcastState();
-    });
-
-    socket.on('cart:updateItemToppings', ({ index, toppings }) => {
-      store.updateItemToppings(index, toppings);
-      broadcastState();
-    });
-
-    socket.on('cart:setReceived', ({ amount }) => {
-      store.setReceived(amount);
-      broadcastState();
-    });
-
-    socket.on('cart:clear', () => {
-      store.clearCart();
-      broadcastState();
-    });
+    handleCartMutation(socket, 'cart:addItem', ({ product, toppings }) => store.addItem(product, toppings));
+    handleCartMutation(socket, 'cart:removeItem', ({ index }) => store.removeItem(index));
+    handleCartMutation(socket, 'cart:updateItemToppings', ({ index, toppings }) => store.updateItemToppings(index, toppings));
+    handleCartMutation(socket, 'cart:setReceived', ({ amount }) => store.setReceived(amount));
+    handleCartMutation(socket, 'cart:clear', () => store.clearCart());
 
     handleMutation(socket, 'order:checkout', () => store.checkout());
     handleMutation(socket, 'order:cancel', ({ day, id }) => store.cancelOrder(day, id));
