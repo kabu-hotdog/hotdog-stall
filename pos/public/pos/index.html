@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>POS - おいしいホットドック屋さん</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  .layout { display: flex; height: 100vh; }
+  .cart-panel { flex: 2; padding: 16px; overflow-y: auto; }
+  .orders-panel { flex: 1; padding: 16px; border-left: 2px solid #ddd; overflow-y: auto; }
+  .menu-buttons button { margin: 4px; font-size: 22px; }
+  .cart-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid #eee; }
+  .toppings label { margin-right: 8px; font-size: 14px; }
+  .total-row { font-size: 28px; margin: 16px 0; }
+  .checkout-row input { font-size: 22px; width: 120px; }
+  .order-row { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+  .tab-buttons button.active { background: #1976d2; color: #fff; }
+</style>
+</head>
+<body>
+<div class="offline-banner" id="offlineBanner">オフライン - 再接続中...</div>
+
+<div class="layout">
+  <div class="cart-panel">
+    <h1>レジ</h1>
+    <div class="menu-buttons">
+      <button id="addHotdog">ホットドッグ 200円を追加</button>
+      <button id="addCheeseHotdog">チーズホットドッグ 300円を追加</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="total-row">合計: <span id="total">0</span>円</div>
+    <div class="checkout-row">
+      預かり金: <input type="number" id="received" value="0">
+      おつり: <span id="change">0</span>円
+      <button id="checkoutBtn" disabled>会計確定</button>
+    </div>
+  </div>
+
+  <div class="orders-panel">
+    <div class="tab-buttons">
+      <button id="tabActive" class="active">受渡待ち</button>
+      <button id="tabSales">売上</button>
+    </div>
+    <div id="activeView">
+      <h2>未受渡の注文</h2>
+      <div id="activeOrders"></div>
+    </div>
+    <div id="salesView" style="display:none;">
+      <h2>本日の売上</h2>
+      <p>累計売上額: <span id="totalRevenue">0</span>円</p>
+      <p>販売本数: <span id="totalItems">0</span>本</p>
+      <h3>時間帯別</h3>
+      <div id="byHour"></div>
+      <h3>注文履歴</h3>
+      <div id="history"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="pos.js"></script>
+</body>
+</html>
