@@ -168,7 +168,27 @@ function renderSales(stats) {
   byHourEl.innerHTML = stats.byHour.map((h) => `<div>${h.hour}時台: ${h.count}本 / ${h.revenue}円</div>`).join('');
 
   const historyEl = document.getElementById('history');
-  historyEl.innerHTML = stats.history.map((h) => `<div>#${h.id} ${h.itemCount}本 ${h.total}円 (${h.status})</div>`).join('');
+  historyEl.innerHTML = '';
+  stats.history.forEach((h) => {
+    const row = document.createElement('div');
+
+    const label = document.createElement('span');
+    label.textContent = `#${h.id} ${h.itemCount}本 ${h.total}円 (${h.status})`;
+    row.appendChild(label);
+
+    if (h.status === 'handed') {
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '削除';
+      deleteBtn.addEventListener('click', () => {
+        if (confirm(`注文 #${h.id} を削除しますか？（売上集計から除外されます）`)) {
+          socket.emit('order:cancel', { day: h.day, id: h.id });
+        }
+      });
+      row.appendChild(deleteBtn);
+    }
+
+    historyEl.appendChild(row);
+  });
 }
 
 socket.on('state', (state) => {
