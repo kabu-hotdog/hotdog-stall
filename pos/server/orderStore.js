@@ -117,7 +117,9 @@ class OrderStore {
 
   _findOrder(day, id) {
     const orders = this.ordersByDay[day] || [];
-    const order = orders.find((o) => o.id === id);
+    // 注文番号は行列が捌けると使い回されるため、同じidが複数存在しうる。
+    // 常に最後（＝最新）に一致した注文を対象にする。
+    const order = orders.findLast((o) => o.id === id);
     if (!order) {
       throw new Error(`order not found: ${day} #${id}`);
     }
