@@ -111,6 +111,48 @@ class OrderStore {
   getOrders(day) {
     return this.ordersByDay[day] || [];
   }
+
+  _findOrder(day, id) {
+    const orders = this.ordersByDay[day] || [];
+    const order = orders.find((o) => o.id === id);
+    if (!order) {
+      throw new Error(`order not found: ${day} #${id}`);
+    }
+    return order;
+  }
+
+  cancelOrder(day, id) {
+    const order = this._findOrder(day, id);
+    if (!ACTIVE_STATUSES.includes(order.status)) {
+      throw new Error(`cannot cancel order in status: ${order.status}`);
+    }
+    order.status = 'cancelled';
+    return order;
+  }
+
+  markReady(day, id) {
+    const order = this._findOrder(day, id);
+    if (order.status !== 'paid' && order.status !== 'cooking') {
+      throw new Error(`cannot mark ready from status: ${order.status}`);
+    }
+    order.status = 'ready';
+    order.readyAt = this.now().toISOString();
+    return order;
+  }
+
+  markHanded(day, id) {
+    const order = this._findOrder(day, id);
+    if (order.status !== 'ready') {
+      throw new Error(`cannot mark handed from status: ${order.status}`);
+    }
+    order.status = 'handed';
+    order.handedAt = this.now().toISOString();
+    return order;
+  }
+
+  toJSON() {
+    return { ordersByDay: this.ordersByDay, cart: this.cart };
+  }
 }
 
 module.exports = { OrderStore, formatDay, ACTIVE_STATUSES };
