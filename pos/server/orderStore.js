@@ -128,7 +128,7 @@ class OrderStore {
 
   cancelOrder(day, id) {
     const order = this._findOrder(day, id);
-    if (!ACTIVE_STATUSES.includes(order.status)) {
+    if (!ACTIVE_STATUSES.includes(order.status) && order.status !== 'handed') {
       throw new Error(`cannot cancel order in status: ${order.status}`);
     }
     order.status = 'cancelled';

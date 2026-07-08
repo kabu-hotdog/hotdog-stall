@@ -36,11 +36,18 @@ test('cancelOrder は paid/cooking/ready から cancelled に遷移する', () =
   assert.equal(updated.status, 'cancelled');
 });
 
-test('cancelOrder は handed になった注文には使えない', () => {
+test('cancelOrder は handed の注文にも使える（売上画面からの削除用）', () => {
   const { store, order } = checkedOutStore();
   store.markReady(order.day, order.id);
   store.markHanded(order.day, order.id);
-  assert.throws(() => store.cancelOrder(order.day, order.id), /cannot cancel order in status: handed/);
+  const updated = store.cancelOrder(order.day, order.id);
+  assert.equal(updated.status, 'cancelled');
+});
+
+test('cancelOrder は cancelled になった注文には使えない（二重削除防止）', () => {
+  const { store, order } = checkedOutStore();
+  store.cancelOrder(order.day, order.id);
+  assert.throws(() => store.cancelOrder(order.day, order.id), /cannot cancel order in status: cancelled/);
 });
 
 test('存在しない注文番号を指定すると例外を投げる', () => {
