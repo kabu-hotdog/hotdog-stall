@@ -116,16 +116,20 @@ pos/public/pos/pos.js       # テンキークリックハンドラ、renderCart(
 document.querySelectorAll('.key').forEach((btn) => {
   btn.addEventListener('click', () => {
     const digit = btn.dataset.digit;
-    const current = String(latestState.cart.received);
-    const amount = Number(current + digit);
+    const receivedInput = document.getElementById('received');
+    const amount = Number(receivedInput.value + digit);
+    receivedInput.value = amount;
     socket.emit('cart:setReceived', { amount });
   });
 });
 
 document.getElementById('keyClear').addEventListener('click', () => {
+  document.getElementById('received').value = 0;
   socket.emit('cart:setReceived', { amount: 0 });
 });
 ```
+
+`latestState.cart.received`（サーバーからの確認応答を待つ値）ではなく、`#received` 入力欄のDOM値を直接読み書きする点に注意。前者を使うと、サーバーとの往復より速く連続タップした場合に後のタップが古い値を元に計算してしまうレース条件がある（実機検証で発見）。DOM値を都度同期的に読み書きすることで、ネットワーク往復を待たずに正しく桁が積み上がる。
 
 - [ ] **Step 4: renderCart()にテンキーの無効化ロジックを追加**
 
@@ -182,4 +186,5 @@ git commit -m "pos: レジ画面に預かり金テンキーを追加"
 
 - **仕様書カバレッジ**: テンキー12ボタン追加→Step2、末尾桁追加動作→Step3、クリア→Step3、カート空時の無効化→Step4。仕様書の全項目に対応。
 - **プレースホルダー確認**: 全ステップに完全なコードを記載済み。
-- **型・シグネチャの一貫性**: `cart:setReceived` イベント名・ペイロード形（`{ amount: number }`）は既存のクイックボタン実装（`pos.js:28-38`）と完全に一致。`latestState.cart.received` は既存の `socket.on('state', ...)`（`pos.js:156-162`）で毎回更新される既存グローバル変数を利用しており、新しい状態管理を導入していない。`.keypad button` セレクタは `#keyClear` を含む12ボタン全てにマッチする（`#keyClear` も `.keypad` の子要素として配置しているため、個別のid参照なしで一括無効化できる）。
+- **型・シグネチャの一貫性**: `cart:setReceived` イベント名・ペイロード形（`{ amount: number }`）は既存のクイックボタン実装（`pos.js:28-38`）と完全に一致。`.keypad button` セレクタは `#keyClear` を含む12ボタン全てにマッチする（`#keyClear` も `.keypad` の子要素として配置しているため、個別のid参照なしで一括無効化できる）。
+- **実装時の修正**: 当初案（`latestState.cart.received` を読む）は実機ブラウザ検証でレース条件が見つかったため、`#received` のDOM値を直接読み書きする方式に変更した。詳細はStep 3のコード直後の注記を参照。

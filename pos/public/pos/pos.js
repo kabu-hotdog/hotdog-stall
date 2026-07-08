@@ -37,6 +37,21 @@ document.getElementById('quick1000').addEventListener('click', () => {
   socket.emit('cart:setReceived', { amount: 1000 });
 });
 
+document.querySelectorAll('.key').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const digit = btn.dataset.digit;
+    const receivedInput = document.getElementById('received');
+    const amount = Number(receivedInput.value + digit);
+    receivedInput.value = amount;
+    socket.emit('cart:setReceived', { amount });
+  });
+});
+
+document.getElementById('keyClear').addEventListener('click', () => {
+  document.getElementById('received').value = 0;
+  socket.emit('cart:setReceived', { amount: 0 });
+});
+
 document.getElementById('checkoutBtn').addEventListener('click', () => {
   socket.emit('order:checkout', {}, (result) => {
     if (!result.ok) {
@@ -106,6 +121,9 @@ function renderCart(cart) {
   document.getElementById('quickExact').disabled = cartEmpty;
   document.getElementById('quick500').disabled = cartEmpty;
   document.getElementById('quick1000').disabled = cartEmpty;
+  document.querySelectorAll('.keypad button').forEach((btn) => {
+    btn.disabled = cartEmpty;
+  });
 }
 
 function renderActiveOrders(orders) {
