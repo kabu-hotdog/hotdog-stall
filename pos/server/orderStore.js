@@ -69,6 +69,48 @@ class OrderStore {
     this.cart = this._emptyCart();
     return this.getCart();
   }
+
+  _nextOrderId(day) {
+    const orders = this.ordersByDay[day] || [];
+    const hasActive = orders.some((o) => ACTIVE_STATUSES.includes(o.status));
+    if (!hasActive) return 1;
+    const maxId = orders.reduce((max, o) => Math.max(max, o.id), 0);
+    return maxId + 1;
+  }
+
+  checkout() {
+    if (this.cart.items.length === 0) {
+      throw new Error('cart is empty');
+    }
+    const total = this._cartTotal();
+    if (this.cart.received < total) {
+      throw new Error('received amount is less than total');
+    }
+    const day = this.getDay();
+    const id = this._nextOrderId(day);
+    const nowIso = this.now().toISOString();
+    const order = {
+      id,
+      day,
+      items: this.cart.items,
+      total,
+      received: this.cart.received,
+      change: this.cart.received - total,
+      status: 'paid',
+      createdAt: nowIso,
+      paidAt: nowIso,
+      readyAt: null,
+      handedAt: null,
+    };
+    if (!this.ordersByDay[day]) this.ordersByDay[day] = [];
+    this.ordersByDay[day].push(order);
+    this.clearCart();
+    return order;
+  }
+
+  getOrders(day) {
+    return this.ordersByDay[day] || [];
+  }
 }
 
 module.exports = { OrderStore, formatDay, ACTIVE_STATUSES };
