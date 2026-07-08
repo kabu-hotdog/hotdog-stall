@@ -53,6 +53,17 @@ test('setReceived と getCart でおつりが計算される', () => {
   assert.equal(cart.change, 300);
 });
 
+test('setReceived は負の金額で例外を投げる', () => {
+  const store = makeStore();
+  assert.throws(() => store.setReceived(-100), /invalid received amount/);
+});
+
+test('setReceived は数値以外(NaN・文字列)で例外を投げる', () => {
+  const store = makeStore();
+  assert.throws(() => store.setReceived(NaN), /invalid received amount/);
+  assert.throws(() => store.setReceived('500'), /invalid received amount/);
+});
+
 test('clearCart でカートが空になる', () => {
   const store = makeStore();
   store.addItem('hotdog', { ketchup: 'normal', mustard: 'normal', mayo: 'normal' });

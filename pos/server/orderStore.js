@@ -61,6 +61,9 @@ class OrderStore {
   }
 
   setReceived(amount) {
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+      throw new Error(`invalid received amount: ${amount}`);
+    }
     this.cart.received = amount;
     return this.getCart();
   }
