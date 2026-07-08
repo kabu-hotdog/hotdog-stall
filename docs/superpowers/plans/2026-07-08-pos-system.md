@@ -84,7 +84,7 @@ pos/
   "private": true,
   "scripts": {
     "start": "node server/index.js",
-    "test": "node --test test/"
+    "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
     "express": "^4.19.2",
