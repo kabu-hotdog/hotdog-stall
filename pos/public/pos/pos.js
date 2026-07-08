@@ -25,6 +25,18 @@ document.getElementById('received').addEventListener('input', (e) => {
   socket.emit('cart:setReceived', { amount: Number(e.target.value) || 0 });
 });
 
+document.getElementById('quickExact').addEventListener('click', () => {
+  socket.emit('cart:setReceived', { amount: latestState.cart.total });
+});
+
+document.getElementById('quick500').addEventListener('click', () => {
+  socket.emit('cart:setReceived', { amount: 500 });
+});
+
+document.getElementById('quick1000').addEventListener('click', () => {
+  socket.emit('cart:setReceived', { amount: 1000 });
+});
+
 document.getElementById('checkoutBtn').addEventListener('click', () => {
   socket.emit('order:checkout', {}, (result) => {
     if (!result.ok) {
@@ -88,7 +100,12 @@ function renderCart(cart) {
 
   document.getElementById('total').textContent = cart.total;
   document.getElementById('change').textContent = Math.max(cart.change, 0);
-  document.getElementById('checkoutBtn').disabled = cart.items.length === 0 || cart.received < cart.total;
+
+  const cartEmpty = cart.items.length === 0;
+  document.getElementById('checkoutBtn').disabled = cartEmpty || cart.received < cart.total;
+  document.getElementById('quickExact').disabled = cartEmpty;
+  document.getElementById('quick500').disabled = cartEmpty;
+  document.getElementById('quick1000').disabled = cartEmpty;
 }
 
 function renderActiveOrders(orders) {
