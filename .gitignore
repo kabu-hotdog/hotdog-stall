@@ -3,3 +3,5 @@ node_modules/
 package-lock.json
 pos/data/state.json
 pos/data/*.tmp
+pos/data/state-backup-*.json
+pos/data/report.html
