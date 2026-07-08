@@ -60,3 +60,9 @@ test('注文履歴を古い順に返す', () => {
   const stats = computeSalesStats(orders);
   assert.deepEqual(stats.history.map((h) => h.id), [1, 2]);
 });
+
+test('history には day フィールドが含まれる', () => {
+  const orders = [order({ id: 1, day: '2026-10-16' })];
+  const stats = computeSalesStats(orders);
+  assert.equal(stats.history[0].day, '2026-10-16');
+});
