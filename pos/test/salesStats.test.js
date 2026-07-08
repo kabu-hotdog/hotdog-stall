@@ -5,6 +5,7 @@ const { computeSalesStats } = require('../server/salesStats');
 function order(overrides) {
   return {
     id: 1,
+    uid: 'uid-1',
     day: '2026-10-16',
     items: [{ product: 'hotdog', toppings: {} }],
     total: 200,
@@ -65,4 +66,13 @@ test('history には day フィールドが含まれる', () => {
   const orders = [order({ id: 1, day: '2026-10-16' })];
   const stats = computeSalesStats(orders);
   assert.equal(stats.history[0].day, '2026-10-16');
+});
+
+test('history には uid フィールドが含まれる（番号が使い回されても特定の注文を一意に指せるように）', () => {
+  const orders = [
+    order({ id: 1, uid: 'uid-a', paidAt: '2026-10-16T01:00:00.000Z' }),
+    order({ id: 1, uid: 'uid-b', paidAt: '2026-10-16T02:00:00.000Z' }),
+  ];
+  const stats = computeSalesStats(orders);
+  assert.deepEqual(stats.history.map((h) => h.uid), ['uid-a', 'uid-b']);
 });

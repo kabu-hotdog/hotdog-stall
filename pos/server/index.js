@@ -78,6 +78,7 @@ function buildServer({ dataFile = DEFAULT_DATA_FILE, now = () => new Date() } = 
 
     handleMutation(socket, 'order:checkout', () => store.checkout());
     handleMutation(socket, 'order:cancel', ({ day, id }) => store.cancelOrder(day, id));
+    handleMutation(socket, 'order:delete', ({ uid }) => store.cancelOrderByUid(uid));
     handleMutation(socket, 'order:ready', ({ day, id }) => store.markReady(day, id));
     handleMutation(socket, 'order:handed', ({ day, id }) => store.markHanded(day, id));
   });

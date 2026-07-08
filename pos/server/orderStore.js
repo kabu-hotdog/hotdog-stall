@@ -1,3 +1,4 @@
+const { randomUUID } = require('node:crypto');
 const { priceOf } = require('./menu');
 
 function formatDay(date) {
@@ -94,6 +95,7 @@ class OrderStore {
     const nowIso = this.now().toISOString();
     const order = {
       id,
+      uid: randomUUID(),
       day,
       items: this.cart.items,
       total,
@@ -128,6 +130,21 @@ class OrderStore {
 
   cancelOrder(day, id) {
     const order = this._findOrder(day, id);
+    if (!ACTIVE_STATUSES.includes(order.status) && order.status !== 'handed') {
+      throw new Error(`cannot cancel order in status: ${order.status}`);
+    }
+    order.status = 'cancelled';
+    return order;
+  }
+
+  // day+idは番号が使い回されると複数の注文に一致しうるため、
+  // 履歴上の特定の1件を狙って操作する場合はuidで一意に特定する。
+  cancelOrderByUid(uid) {
+    const allOrders = Object.values(this.ordersByDay).flat();
+    const order = allOrders.find((o) => o.uid === uid);
+    if (!order) {
+      throw new Error(`order not found: uid ${uid}`);
+    }
     if (!ACTIVE_STATUSES.includes(order.status) && order.status !== 'handed') {
       throw new Error(`cannot cancel order in status: ${order.status}`);
     }

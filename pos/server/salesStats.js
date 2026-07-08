@@ -19,6 +19,7 @@ function computeSalesStats(orders) {
 
     history.push({
       id: order.id,
+      uid: order.uid,
       day: order.day,
       itemCount: order.items.length,
       total: order.total,

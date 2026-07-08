@@ -43,6 +43,19 @@ test('checkout は未受渡注文があれば番号が加算される', () => {
   assert.equal(second.id, 2);
 });
 
+test('checkout は表示用番号(id)とは別に、常に一意なuidを発行する', () => {
+  const store = makeStore();
+  store.addItem('hotdog', { ketchup: 'normal', mustard: 'normal', mayo: 'normal' });
+  store.setReceived(200);
+  const first = store.checkout();
+  store.addItem('hotdog', { ketchup: 'normal', mustard: 'normal', mayo: 'normal' });
+  store.setReceived(200);
+  const second = store.checkout();
+  assert.ok(first.uid);
+  assert.ok(second.uid);
+  assert.notEqual(first.uid, second.uid);
+});
+
 test('getOrders は指定日の注文一覧を返す', () => {
   const store = makeStore();
   store.addItem('hotdog', { ketchup: 'normal', mustard: 'normal', mayo: 'normal' });

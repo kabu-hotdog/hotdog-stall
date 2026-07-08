@@ -181,7 +181,7 @@ function renderSales(stats) {
       deleteBtn.textContent = '削除';
       deleteBtn.addEventListener('click', () => {
         if (confirm(`注文 #${h.id} を削除しますか？（売上集計から除外されます）`)) {
-          socket.emit('order:cancel', { day: h.day, id: h.id });
+          socket.emit('order:delete', { uid: h.uid });
         }
       });
       row.appendChild(deleteBtn);
