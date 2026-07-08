@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>厨房</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  body { padding: 24px; }
+  .queue { display: flex; flex-wrap: wrap; gap: 16px; }
+  .order-card { border: 2px solid #333; border-radius: 12px; padding: 16px; width: 260px; }
+  .order-card h2 { margin: 0 0 8px; font-size: 40px; }
+  .order-card .toppings { font-size: 16px; margin: 4px 0; }
+  .order-card button { width: 100%; margin-top: 12px; font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="offline-banner" id="offlineBanner">オフライン - 再接続中...</div>
+<h1>厨房 - 注文キュー</h1>
+<div class="queue" id="queue"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="kitchen.js"></script>
+</body>
+</html>

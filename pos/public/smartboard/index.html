@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>おいしいホットドック屋さん - 受け取り案内</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  body { padding: 0; background: #111; color: #fff; height: 100vh; }
+  .columns { display: flex; height: 100vh; }
+  .column { flex: 1; padding: 40px; }
+  .column h1 { font-size: 48px; text-align: center; margin-bottom: 40px; }
+  .waiting { color: #888; }
+  .ready { color: #fff; }
+  .number-grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+  .number { font-size: 96px; font-weight: bold; width: 160px; text-align: center; }
+  .divider { width: 4px; background: #333; }
+</style>
+</head>
+<body>
+<div class="offline-banner" id="offlineBanner">オフライン - 再接続中...</div>
+<div class="columns">
+  <div class="column waiting">
+    <h1>呼び出し待ち</h1>
+    <div class="number-grid" id="waitingNumbers"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="column ready">
+    <h1>お受け取りください</h1>
+    <div class="number-grid" id="readyNumbers"></div>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="smartboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ご注文内容</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  body { text-align: center; padding: 40px; }
+  .item-line { font-size: 32px; margin: 8px 0; }
+  .total-line { font-size: 56px; margin: 32px 0; font-weight: bold; }
+  .money-line { font-size: 36px; margin: 8px 0; }
+  .empty { font-size: 40px; color: #999; margin-top: 100px; }
+</style>
+</head>
+<body>
+<div class="offline-banner" id="offlineBanner">オフライン - 再接続中...</div>
+<h1>ご注文内容</h1>
+<div id="content"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="customer.js"></script>
+</body>
+</html>
