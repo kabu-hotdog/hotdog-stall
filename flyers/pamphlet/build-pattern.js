@@ -183,6 +183,11 @@ const rng = mulberry32(seed);
 // 縦横比もそのまま。ただし倍率は写真ごとに変えて、【顔の高さ】を FACE_H にそろえる。
 // CHARA=1 を付けると、写真の代わりに保成のデフォルメキャラ（draw-hosei.js）を部品にする
 const CHARA = process.env.CHARA === '1';
+// 主役にする写真（ユーザー指定：この3枚をメイン、他は背景埋め）
+const MAIN_FILES = ['1000019062', '1000019756', '1000023102'];
+const MAIN_REPEAT = 1.08;   // メインは長辺の1.08倍＝接触しないぎりぎりまで詰める
+const SUB_REPEAT = 2.0;    // 脇役の間隔の下限（これより詰めない＝枚数を抑える）
+
 const SOURCES = CHARA
   ? require('./draw-hosei').makeVariants().map(v => ({ file: `chara:${v.name}`, face: v.face, tilt: v.tilt, preloaded: v.img }))
   : ITEMS;
@@ -198,8 +203,10 @@ const items = SOURCES.map(it => {
   const faceR = Math.max(ow, oh) / 2 * scale;   // 顔の半径（キャンバス上のpx）
   // 顔を前面に出す仕上げ用の楕円（画像内の座標。髪・あごまで入るよう少し広め）
   const faceOnly = { x: anchor.x, y: anchor.y, rx: ow * 0.62, ry: oh * 0.66 };
-  console.log(`  ${it.file}: ${img.width}x${img.height} / 顔高 ${oh} -> ×${scale.toFixed(2)} = ${Math.round(img.width * scale)}x${Math.round(img.height * scale)} (${it.tilt}°)`);
-  return { img, anchor, scale, tilt: it.tilt, faceR, faceOnly };
+  // メイン扱いの写真（ユーザー指定）。条件は他と同じだが、枚数・位置・手前優先で主役にする。
+  const main = MAIN_FILES.some(n => it.file.includes(n));
+  console.log(`  ${it.file}${main ? '【メイン】' : ''}: ${img.width}x${img.height} / 顔高 ${oh} -> ×${scale.toFixed(2)} = ${Math.round(img.width * scale)}x${Math.round(img.height * scale)} (${it.tilt}°)`);
+  return { img, anchor, scale, tilt: it.tilt, faceR, faceOnly, main };
 });
 
 // キャンバス（地色）
@@ -270,7 +277,10 @@ for (let i = anchorsSpread.length - 1; i > 0; i--) {   // シャッフル
   const j = Math.floor(rng() * (i + 1));
   [anchorsSpread[i], anchorsSpread[j]] = [anchorsSpread[j], anchorsSpread[i]];
 }
-items.forEach((it, idx) => {
+// メインを先に置いて良い場所を取らせる（脇役は残りに回る）
+const pass0Order = items.map((_, i) => i).sort((a, b) => (items[b].main ? 1 : 0) - (items[a].main ? 1 : 0));
+pass0Order.forEach(idx => {
+  const it = items[idx];
   const margin = it.faceR * 1.15;   // 顔が切れないための余白
   let best = null;
   for (const a of anchorsSpread) {
@@ -318,15 +328,17 @@ console.log(`  顔が完全に写る1枚目を各写真ぶん配置: ${placed.le
 // なるように計算する（大きい写真は広く、小さい写真は細かく散る）。
 const REPEAT_ANGLE = Number(process.argv[5] || 34);
 const COVER_TARGET = 3.0;   // キャンバス面積の何倍ぶん置くか（重なりしろ）
-const sumRatio = items.reduce((s, it) => {
-  const w = it.img.width * it.scale, h = it.img.height * it.scale;
-  return s + (w * h) / Math.pow(Math.max(w, h), 2);
-}, 0);
-const K = Math.max(1.05, Math.sqrt(sumRatio / COVER_TARGET));   // 1.05未満＝自分自身と接触するので下限
-items.forEach(it => {
-  const longSide = Math.max(it.img.width * it.scale, it.img.height * it.scale);
-  it.repeatDist = K * longSide;
-});
+// メインは自分自身と接触しないぎりぎりまで間隔を詰めて枚数を稼ぐ。
+// 脇役は、画面全体の被覆量が COVER_TARGET になるよう逆算した間隔にする（＝残りを埋めるだけ）。
+// 「同じ写真の間隔と角度は固定」という条件はそのまま。
+const longOf = it => Math.max(it.img.width * it.scale, it.img.height * it.scale);
+const areaOf = it => it.img.width * it.scale * it.img.height * it.scale;
+items.filter(it => it.main).forEach(it => { it.repeatDist = MAIN_REPEAT * longOf(it); });
+const mainCover = items.filter(it => it.main).reduce((s, it) => s + areaOf(it) / (it.repeatDist ** 2), 0);
+const subShape = items.filter(it => !it.main).reduce((s, it) => s + areaOf(it) / (longOf(it) ** 2), 0);
+const subCover = Math.max(0.35, COVER_TARGET - mainCover);   // 脇役に残す被覆量
+const K = Math.max(SUB_REPEAT, Math.sqrt(subShape / subCover));
+items.filter(it => !it.main).forEach(it => { it.repeatDist = K * longOf(it); });
 const th = REPEAT_ANGLE * Math.PI / 180;
 const base = placed.slice();   // パス0で置いた各写真の基準点
 let lattice = 0;
@@ -368,10 +380,12 @@ function bodyRect(p) {
 // 体の矩形が、相手の顔（円を正方形で近似）をどれだけ覆うか
 function faceHidden(coverer, target) {
   if (coverer === target) return 0;
-  const b = bodyRect(coverer), r = items[target.idx].faceR;
+  const t = items[target.idx], b = bodyRect(coverer), r = t.faceR;
   const w = Math.min(b.cx + b.rx, target.cx + r) - Math.max(b.cx - b.rx, target.cx - r);
   const h = Math.min(b.cy + b.ry, target.cy + r) - Math.max(b.cy - b.ry, target.cy - r);
-  return w > 0 && h > 0 ? w * h : 0;
+  if (w <= 0 || h <= 0) return 0;
+  // メインの顔は重く見積もる＝メインの顔を隠す写真ほど下に回る
+  return w * h * (t.main ? 3 : 1);
 }
 const remaining = placed.map((p, i) => i);
 const drawOrder = [];
@@ -385,14 +399,37 @@ while (remaining.length) {
   drawOrder.push(remaining[worst]);   // 他人の顔をいちばん隠す写真を、いちばん下へ
   remaining.splice(worst, 1);
 }
+// 注：ここでメインを一律に最前面へ回すと、メインの大きな体が他の顔を潰して
+// 「顔が見えない塊」が増えた（実測）。主役扱いは枚数と配置の優先で表現し、
+// 重なり順は上の「顔が隠れる面積が最小」の計算に任せる（メインの顔は3倍で重み付け済み）。
 let hiddenSum = 0;
 drawOrder.forEach((pi, order) => {
   for (let k = order + 1; k < drawOrder.length; k++) hiddenSum += faceHidden(placed[drawOrder[k]], placed[pi]);
 });
-for (const pi of drawOrder) {
-  const p = placed[pi], it = items[p.idx];
+// ── 手動調整 ───────────────────────────────────────────────
+// 自動配置の結果を _placements.json に書き出し、手で座標や重なり順を直せるようにする。
+// ファイルがあればそれを「正」として使う（＝手で直した配置が自動計算に潰されない）。
+// 手動ファイルを捨てて自動配置に戻したいときは _placements.json を消す。
+const PLACEMENTS = 'flyers/pamphlet/_placements.json';
+let finalOrder = drawOrder.map(pi => ({ ...placed[pi], file: SOURCES[placed[pi].idx].file }));
+if (fs.existsSync(PLACEMENTS) && process.env.REPLACE_PLACEMENTS !== '1') {
+  const manual = JSON.parse(fs.readFileSync(PLACEMENTS, 'utf8').replace(/^﻿/, ''));
+  finalOrder = manual.map(m => ({
+    ...m,
+    idx: SOURCES.findIndex(s => s.file === m.file),
+  })).filter(m => m.idx >= 0);
+  console.log(`  手動配置を使用: ${PLACEMENTS}（${finalOrder.length}枚。下から順に描画）`);
+} else {
+  fs.writeFileSync(PLACEMENTS, JSON.stringify(
+    finalOrder.map(p => ({ file: p.file, cx: Math.round(p.cx), cy: Math.round(p.cy) })), null, 1));
+  console.log(`  配置を書き出し: ${PLACEMENTS}（手で編集可。配列の順＝下から上）`);
+}
+for (const p of finalOrder) {
+  const it = items[p.idx];
   drawRotated(canvas, it.img, it.anchor, p.cx, p.cy, it.scale, it.tilt, cov, covScale);
 }
+placed.length = 0;
+finalOrder.forEach(p => placed.push(p));
 console.log(`  重なり順を計算（顔が隠れる合計面積 ${Math.round(hiddenSum / 1000)}k px²）`);
 items.forEach((it,i)=>console.log(`    ${ITEMS[i].file.slice(0,10)}: 写真 ${Math.round(it.img.width*it.scale)}x${Math.round(it.img.height*it.scale)} -> 同一写真の間隔 ${Math.round(it.repeatDist)}px`));
 
@@ -430,5 +467,8 @@ if (BRIGHTEN > 0) {
 const png = new PNG({ width: SIZE, height: SIZE });
 canvas.data.copy(png.data);
 fs.writeFileSync(OUT, PNG.sync.write(png));
+const counts = {};
+placed.forEach(p => { const n = SOURCES[p.idx].file.slice(0,12); counts[n] = (counts[n]||0)+1; });
+console.log("  枚数の内訳:", Object.entries(counts).map(([k,v])=>k+(items[SOURCES.findIndex(s2=>s2.file.startsWith(k))].main?"【メイン】":"")+":"+v).join(" / "));
 const rest = cov.data.reduce((a, v) => a + (v ? 0 : 1), 0) / (cov.w * cov.h);
 console.log(`wrote ${OUT} (${SIZE}px, seed=${seed}, 顔高=${FACE_H}px, ${placed.length}枚, 地色の残り ${(rest * 100).toFixed(1)}%)`);

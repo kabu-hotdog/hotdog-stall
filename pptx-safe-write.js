@@ -11,7 +11,8 @@ function safeWriteFile(pptx, fileName) {
   const ledgerPath = path.join(dir, '.approved-hashes.json');
 
   if (fs.existsSync(fileName) && fs.existsSync(ledgerPath)) {
-    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+    // approve-flyer.ps1 が UTF-8 BOM 付きで書き出すので、BOM を除いてから解析する
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8').replace(/^﻿/, ''));
     const entry = ledger[name];
     if (entry) {
       const currentHash = crypto.createHash('sha256').update(fs.readFileSync(fileName)).digest('hex').toUpperCase();
