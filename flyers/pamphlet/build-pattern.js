@@ -183,18 +183,22 @@ const rng = mulberry32(seed);
 // 縦横比もそのまま。ただし倍率は写真ごとに変えて、【顔の高さ】を FACE_H にそろえる。
 // CHARA=1 を付けると、写真の代わりに保成のデフォルメキャラ（draw-hosei.js）を部品にする
 const CHARA = process.env.CHARA === '1';
+const CHARA_MODE = process.env.CHARA === '1';
 // 主役にする写真（ユーザー指定：この3枚をメイン、他は背景埋め）
-const MAIN_FILES = ['1000019062', '1000019756', '1000023102'];
+const MAIN_FILES = CHARA_MODE ? ['06-', '07-', '08-'] : ['1000019062', '1000019756', '1000023102'];
 const MAIN_REPEAT = 1.08;   // メインは長辺の1.08倍＝接触しないぎりぎりまで詰める
 const SUB_REPEAT = 2.0;    // 脇役の間隔の下限（これより詰めない＝枚数を抑える）
 
+// CHARA=1：ChatGPT/Geminiで写真8枚をデフォルメ化したイラスト（images/chara/final）を使う。
+// 顔矩形は肌色の連結成分から自動検出したもの（_chara-rects.json）。
+const CHARA_DIR = 'images/chara/final';
 const SOURCES = CHARA
-  ? require('./draw-hosei').makeVariants().map(v => ({ file: `chara:${v.name}`, face: v.face, tilt: v.tilt, preloaded: v.img }))
+  ? JSON.parse(fs.readFileSync('flyers/pamphlet/_chara-rects.json', 'utf8'))
   : ITEMS;
 
 console.log(`素材を読み込み中（${CHARA ? 'デフォルメキャラ' : '写真'}・顔の高さを ${FACE_H}px にそろえる）...`);
 const items = SOURCES.map(it => {
-  const { img: trimmed, dx, dy } = trim(it.preloaded || readPng(`${SRC}/${it.file}`));
+  const { img: trimmed, dx, dy } = trim(readPng(`${CHARA ? CHARA_DIR : SRC}/${it.file}`));
   const img = addHalo(trimmed, HALO);
   // 顔矩形を「トリム分」と「フチ分」ずらして、合成後の画像内座標に直す
   const [ox, oy, ow, oh] = it.face;
@@ -410,7 +414,7 @@ drawOrder.forEach((pi, order) => {
 // 自動配置の結果を _placements.json に書き出し、手で座標や重なり順を直せるようにする。
 // ファイルがあればそれを「正」として使う（＝手で直した配置が自動計算に潰されない）。
 // 手動ファイルを捨てて自動配置に戻したいときは _placements.json を消す。
-const PLACEMENTS = 'flyers/pamphlet/_placements.json';
+const PLACEMENTS = CHARA ? 'flyers/pamphlet/_placements-chara.json' : 'flyers/pamphlet/_placements.json';
 let finalOrder = drawOrder.map(pi => ({ ...placed[pi], file: SOURCES[placed[pi].idx].file }));
 if (fs.existsSync(PLACEMENTS) && process.env.REPLACE_PLACEMENTS !== '1') {
   const manual = JSON.parse(fs.readFileSync(PLACEMENTS, 'utf8').replace(/^﻿/, ''));
