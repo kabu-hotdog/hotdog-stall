@@ -16,7 +16,11 @@ const fs = require('fs');
 const { PNG } = require('pngjs');
 
 const SRC = 'images/people/cropped';
-const OUT = process.env.CHARA === '1' ? 'flyers/pamphlet/_assets/hosei-pattern-chara.png' : 'flyers/pamphlet/_assets/hosei-pattern.png';
+// CHARA_VARIANT: final=生成そのまま / flat=色数を落としたフラット版 / duotone=2色版
+const VARIANT = process.env.CHARA_VARIANT || 'final';
+const OUT = process.env.CHARA === '1'
+  ? `flyers/pamphlet/_assets/hosei-pattern-chara${VARIANT === 'final' ? '' : '-' + VARIANT}.png`
+  : 'flyers/pamphlet/_assets/hosei-pattern.png';
 const SIZE = 2400;            // 6in × 400dpi
 const BG = [191, 227, 245];   // 淡い水色 BFE3F5（隙間から覗く地色）
 const HALO = 6;               // 白フチ（px）
@@ -191,7 +195,7 @@ const SUB_REPEAT = 2.0;    // 脇役の間隔の下限（これより詰めな�
 
 // CHARA=1：ChatGPT/Geminiで写真8枚をデフォルメ化したイラスト（images/chara/final）を使う。
 // 顔矩形は肌色の連結成分から自動検出したもの（_chara-rects.json）。
-const CHARA_DIR = 'images/chara/final';
+const CHARA_DIR = `images/chara/${VARIANT}`;
 const SOURCES = CHARA
   ? JSON.parse(fs.readFileSync('flyers/pamphlet/_chara-rects.json', 'utf8'))
   : ITEMS;
@@ -414,7 +418,7 @@ drawOrder.forEach((pi, order) => {
 // 自動配置の結果を _placements.json に書き出し、手で座標や重なり順を直せるようにする。
 // ファイルがあればそれを「正」として使う（＝手で直した配置が自動計算に潰されない）。
 // 手動ファイルを捨てて自動配置に戻したいときは _placements.json を消す。
-const PLACEMENTS = CHARA ? 'flyers/pamphlet/_placements-chara.json' : 'flyers/pamphlet/_placements.json';
+const PLACEMENTS = CHARA ? 'flyers/pamphlet/_placements-chara.json' : 'flyers/pamphlet/_placements.json';   // 配置はキャラ版で共通（絵柄違いでも同じ並び）
 let finalOrder = drawOrder.map(pi => ({ ...placed[pi], file: SOURCES[placed[pi].idx].file }));
 if (fs.existsSync(PLACEMENTS) && process.env.REPLACE_PLACEMENTS !== '1') {
   const manual = JSON.parse(fs.readFileSync(PLACEMENTS, 'utf8').replace(/^﻿/, ''));
